@@ -1,189 +1,147 @@
-# 🖥️ Launch instance and use below user data to setup eks cluster
+# 🖥️ Setup EKS Cluster & MySQL Deployment
 
-````
+## 1. Launch EC2 Instance & Install Dependencies
+Run the user data script below or execute these commands inside your EC2 instance to install AWS CLI, kubectl, and eksctl:
+
+```bash
 #!/bin/bash
-
 sudo apt update -y
 sudo apt install -y curl unzip
 
 # Install AWS CLI
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+curl "[https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip](https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip)" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install
 
 # Install kubectl
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+curl -LO "[https://dl.k8s.io/release/$(curl](https://dl.k8s.io/release/$(curl) -L -s [https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl](https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl)"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 # Install eksctl
-curl --silent --location \
-"https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
-| tar xz -C /tmp
-
+curl --silent --location "[https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname](https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname) -s)_amd64.tar.gz" | tar xz -C /tmp
 sudo mv /tmp/eksctl /usr/local/bin
 sudo chmod +x /usr/local/bin/eksctl
-````
-````
+
+```
+
+Verify installations:
+
+```bash
 aws --version
 kubectl version --client
 eksctl version
-````
-**Configure AWS CLI**
-````
-aws configure
-````
 
-**Create Amazon EKS cluster using eksctl**
-````
-eksctl create cluster --name eks-oncdecb36 --region ap-southeast-1 --version 1.34 --nodegroup-name linux-nodes --node-type t3.small --nodes 1
-````
-**Log In Into EKS cluster**
-````
-aws eks update-kubeconfig --name eks-oncdecb36
-````
-**Delete EKS Cluster**
-````
-eksctl delete cluster --name eks-oncdecb36 --region ap-southeast-1
-````
-**Once Cluster is ready make sure to allow traffic in cluster sg**
-
-- Go to AWS Console → EKS
-- Click on your Cluster
-- Go to Networking tab
-- You’ll see Cluster security group
-- Click on the Security Group ID
-- Click Edit inbound rules
-- Click Add rule
-
----
-Type	|Protocol	|Port	|Source
-All   |traffic	|All	|All	0.0.0.0/0
----
----
-### 🐬 Setup Mysql
-- wait for cluster creation
-- Create Mysql instance using AWS RDS. and connect to cluster worker node
-- Connect to your RDS instance :
+```
 
 ---
 
-<img width="1907" height="782" alt="image" src="https://github.com/user-attachments/assets/57761e95-85de-4f2d-b645-b1d164cb65d9" />
-<img width="1376" height="361" alt="image" src="https://github.com/user-attachments/assets/d7ffeba3-6257-4ec5-b3f5-55cbe9b06c7f" />
-<img width="1627" height="813" alt="image" src="https://github.com/user-attachments/assets/4960707f-eb10-43a5-a800-98b8132248c0" />
+## 2. Configure AWS CLI & Create Cluster
 
+Configure your AWS credentials:
 
 ```bash
-sudo yum update -y
-sudo yum install mariadb105-server -y
+aws configure
+
 ```
-**Login To RDS**
-````
-mysql -h <rds-endpoint> -u <db-username> -p<password> --ssl
-````
 
-- Create the database:
+Create the Amazon EKS cluster:
 
+```bash
+eksctl create cluster --name eks-student --region ap-south-1 --version 1.36 --nodegroup-name studentwebpage-nodes --node-type m7i-flex.large --nodes 1
+
+```
+
+Log into the EKS cluster:
+
+```bash
+aws eks update-kubeconfig --name eks-student
+
+```
+
+---
+
+## 3. Configure Cluster Security Group
+
+Once the cluster creation completes:
+
+1. Open **AWS Console → EKS**.
+2. Select **eks-student** → **Networking** tab.
+3. Click the **Cluster security group** ID.
+4. Click **Edit inbound rules** and add:
+* **Type:** All traffic
+* **Protocol:** All
+* **Port:** All
+* **Source:** `0.0.0.0/0`
+
+
+
+---
+
+## 4. Setup MySQL Database (RDS)
+
+1. Create a MySQL database instance in AWS RDS.
+2. Ensure the RDS Security Group allows **MySQL/Aurora (Port 3306)** inbound traffic from `0.0.0.0/0` or the EKS Cluster Security Group.
+3. Install MariaDB/MySQL client on your EC2 instance:
+```bash
+sudo apt update -y && sudo apt install -y mariadb-client
+
+```
+
+
+4. Connect to your RDS MySQL instance:
+```bash
+mysql -h <rds-endpoint> -u admin -pVaibhav123
+
+```
+
+
+5. Initialize database and privileges:
 ```sql
-CREATE DATABASE student_db;
-```
-```
+CREATE DATABASE IF NOT EXISTS student_db;
 USE student_db;
-```
-
-- Create the students table:
-
-```sql
-CREATE TABLE `students` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `course` varchar(255) DEFAULT NULL,
-  `student_class` varchar(255) DEFAULT NULL,
-  `percentage` double DEFAULT NULL,
-  `branch` varchar(255) DEFAULT NULL,
-  `mobile_number` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-```
-
-```sql
-CREATE DATABASE student_db;
-
-GRANT ALL PRIVILEGES ON student_db.* 
-TO 'admin'@'%' 
-IDENTIFIED BY 'Admin123';
-
+GRANT ALL PRIVILEGES ON student_db.* TO 'admin'@'%' IDENTIFIED BY 'Vaibhav123';
 FLUSH PRIVILEGES;
 
-```bash
-
-
-
-- Exit MySQL:
-
-```bash
-exit
 ```
----
-# ⚙️ Backend
----
 
-### Install Dockerr 
-````
-sudo apt update -y
-sudo apt install docker.io  -y
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker ubuntu
-newgrp docker
-sudo chmod 777 /var/run/docker.sock
-docker --version
-````
----
-### Edit Application.properties file and add db credentials
-<img width="1686" height="947" alt="image" src="https://github.com/user-attachments/assets/a57dc59d-6ca2-4aad-abe2-587fc6fc39da" />
 
-### Create Docker Image and Push to DockerHub
-
-````
-docker build -t abhipraydh96/backend .
-````
-
-````
-docker push abhipraydh96/backend
-````
----
-
-### Edit backend.yaml and update docker image
 
 ---
 
-### Apply manifest files 
+## 5. Deploy Application to EKS
+
+1. Apply Backend Deployment & Service:
+```bash
+kubectl apply -f Kubernetes/backend.yaml
+
+```
+
+
+2. Apply Frontend Deployment & Service:
+```bash
+kubectl apply -f Kubernetes/frontend.yaml
+
+```
+
+
+3. Get LoadBalancer public URL:
+```bash
+kubectl get svc
+
+```
+
+
 
 ---
-### Copy backend service link and paste to frontend dir .env file 
 
----
+## 6. Cleanup Resources
 
-# 🌐 Frontend
----
+To avoid ongoing AWS charges, delete the cluster when finished:
 
-### Edit .env file and add Backend service url
+```bash
+eksctl delete cluster --name eks-student --region ap-south-1
 
-<img width="1182" height="51" alt="image" src="https://github.com/user-attachments/assets/1ee5d68e-33bc-4888-82b1-e1fa52e0a91f" />
-
----
-
-
-### Build Docker Image and push to Dockerhub
-
----
-
-
-### Edit frontend.yaml and change image name
-
----
-
+```
 
 ### Apply manifest file and copy frontend service link and check
 
