@@ -149,3 +149,76 @@ eksctl delete cluster --name eks-student --region ap-south-1
 <img width="1116" height="895" alt="image" src="https://github.com/user-attachments/assets/40b9ad2d-bd0d-40f5-bd8b-6be127999aac" />
 
 
+
+git clone https://github.com/Sourabhf4/student-app-k8s.git
+    2  eksctl create cluster --name eks-student --region ap-south-1 --version 1.36 --nodegroup-name webapp-nodes --node-type m7i-flex.large --nodes 1
+    3  aws eks update-kubeconfig --name eks-student
+    4  ls
+    5  cd student-app-k8s/
+    6  ls
+    7  cd  backend/
+    8  ls
+    9  cd src
+   10  ls
+   11  cd main
+   12  ls
+   13  cd resources/
+   14  ls
+   15  nano application.properties 
+   16  ls
+   17  cd 
+   18  cd student-app-k8s/
+   19  ls
+   20  cd backend/
+   21  ls
+   22  docker login -u vaibhavkunghatkar
+   23  docker pull vaibhavkunghatkar/student-backend
+   24  docker images
+   25  ls
+   26  nano backend.yaml 
+   27  kubectl get pods
+   28  kubectl apply -f backend.yaml 
+   29  kubectl get pods
+   30  nano Dockerfile 
+   31  docker build -t vaibhavkunghatkar/student-backend:latest
+   32  docker build -t vaibhavkunghatkar/student-backend:latest .
+   33  cat backend.yaml 
+   34  kubectl apply -f backend.yaml 
+   35  docker push vaibhavkunghatkar/student-backend
+   36  kubectl apply -f backend.yaml 
+   37  kubectl get pods
+   38  ls
+   39  cd src/main
+   40  ls
+   41  cd resources/
+   42  ls
+   43  nano application.properties 
+   44  ls
+   45  cd ..
+   46  ls
+   47  cd backend/
+   48  ls
+   49  kubectl get pods
+   50  nano backend.yaml 
+   51  kubectl apply -f backend.yaml 
+   52  kubectl get pods
+   53  kubectl delete pod backend-deploy-5fddc9f884-wz4zh --force --grace-period=0
+   54  kubectl get pods
+   55  kubectl get svc
+   56  cd ..
+   57  ls
+   58  cd frontend/
+   59  ls
+   60  ls -a
+   61  nano .env
+   62  ls
+   63  docker build -t vaibhavkunghatkar/student-frontend:latest .
+   64* 
+   65  nano frontend.yaml 
+   66  docker images
+   67  docker push vaibhavkunghatkar/student-frontend:latest 
+   68  kubectl apply -f frontend.yaml 
+   69  kubectl get svc
+   70  kubectl get pods
+   71  history
+
