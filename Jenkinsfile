@@ -1,24 +1,22 @@
 pipeline {
     agent any 
     stages {
-        stage ("pull"){
+        stage('checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/prathamnandgirwar/student-app-k8s.git'
+                echo 'clone the repo'
+                git url: 'https://github.com/Sourabhf4/student-app-k8s.git', branch: 'main'
             }
         }
-         stage ("build"){
+        stage('build') {
             steps {
-                echo "code build success"
+                echo 'build docker images'
+                sh 'cd frontend && docker build -t fronted:latest .'
             }
         }
-         stage ("test"){
+        stage('run') {
             steps {
-                echo "code test success"
-            }
-        }
-         stage ("deploy"){
-            steps {
-                echo "code deploy success"
+                echo 'run the container'
+                sh 'docker run -d -P fronted:latest'
             }
         }
     }
