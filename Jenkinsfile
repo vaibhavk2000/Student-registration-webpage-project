@@ -4,7 +4,7 @@ pipeline {
         stage('checkout') {
             steps {
                 echo 'clone the repo'
-                git url: 'https://github.com/Sourabhf4/student-app-k8s.git', branch: 'main'
+                git url: 'https://github.com/vaibhavk2000/Student-registration-webpage-project.git', branch: 'main'
             }
         }
         stage('build') {
